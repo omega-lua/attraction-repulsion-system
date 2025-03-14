@@ -1,13 +1,12 @@
 // define variables for simulation
-let n = 3;
+let n = 10;
 let nSpecies = 2;
-let particle = [null, null, null, null, null] //[x, y, vx, vy, s(pecies)]
 let Particles = []
 
 // visual canvas settings
 let lastUpdate = 0;
 let updateInterval = 1000 / 1; // 30 updates per second
-let particleSize = 50
+let particleSize = 25
 
 //setting up canvas
 const canvas = document.getElementById('canvas');
@@ -20,11 +19,12 @@ function createParticles() {
   for (let i = 0; i < n; i++) {
     // Create a particle with random values
     let particle = {
-      x: Math.random() * 100, // Random x position between 0 and 100
-      y: Math.random() * 100, // Random y position between 0 and 100
-      vx: Math.random() * 10 - 5, // Random velocity between -5 and 5
-      vy: Math.random() * 10 - 5, // Random velocity between -5 and 5
-      t: Math.random() // Not good code
+      x: canvas.width*0.25 + Math.random() * canvas.width*0.5,
+      y: canvas.height*0.25 + Math.random() * canvas.height*0.5,
+      vx: 0, 
+      vy: 0,
+      type: 0, // Type (unused)
+      fSum: [0,0] // used for force calculation
     };
     
     Particles.push(particle);
@@ -36,43 +36,49 @@ function createParticles() {
 
 function updateSimulation() {
   
-  //calculate distances between each particle
-  let distances = []
-  let vectors = []
+  //calculate for each particle
   for (let i = 0; i < n-1; i++) {
     for (let j = i+1; j < n; j++) {
       // calculate distance
-      let dx = Particles[i].x - Particles[j].x;
-      let dy = Particles[i].y - Particles[j].y;
+      let dx = Particles[j].x - Particles[i].x;
+      let dy = Particles[j].y - Particles[i].y;
       let d = Math.sqrt(dx**2 + dy**2);
       
-      //calculate force vector
-      let vector = [dx, dy]
-      let nVector = [(dx/d), (dy/d)]
+      //calculate vector sum fo
+      let f = (1/d)*(10**3.5); // force formula
+      let vector = [(dx/d)*f, (dy/d)*f]; //normal vector is in bracket, then multiplied by force 
       
-      //calculate force
-      // ...
+      Particles[i].fSum = Particles[i].fSum.map((value, index) => value + vector[index]);
+      Particles[j].fSum = Particles[j].fSum.map((value, index) => value - vector[index]);
       
-      distances.push(d)
     }
   }
-  
-  //calculate force between each particle
-  function gravitationalForce(d) {
-  	let f = 1/d
-    return f
-  }
-  
-  console.log(distances);
-  return distances
+  console.log(Particles)
 }
 
 // function for drawing a particle.
 function drawParticle(particle) {
   ctx.beginPath();
   ctx.arc(particle.x, particle.y, particleSize, 0, Math.PI * 2);
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "black";
   ctx.fill();
+}
+
+// debug function for visualizing force vectors
+function drawForceVectors(Particles) {
+  Particles.forEach((particle) => {
+    let x = particle.x;
+    let y = particle.y;
+
+    // Draw the force vector as a line
+    console.log(particle.fSum)
+    ctx.beginPath();
+    ctx.moveTo(x, y);  // Start the line from the particle's position
+    ctx.lineTo(x + particle.fSum[0], y + particle.fSum[1]);  // End the line at the force vector's end
+    ctx.strokeStyle = 'red';  // Color of the force vector line
+    ctx.lineWidth = 2;  // Line thickness
+    ctx.stroke();
+  });
 }
 
 // upates visuals at every frame
@@ -82,6 +88,7 @@ function updateCanvas() {
   for (let i = 0; i < n; i++) { //draw particles
     drawParticle(Particles[i])
   }
+  drawForceVectors(Particles)
 }
 
 function loopSimulation(timestamp) {
@@ -89,11 +96,12 @@ function loopSimulation(timestamp) {
     if (timestamp - lastUpdate >= updateInterval) {
       
       // update simulation
-      updateSimulation()
+      updateSimulation();
 
       // update canvas
-      updateCanvas()
+      updateCanvas();
 
+      throw new Error("DEBUG: Stops after 1 simulation loop."); // DEBUG
       lastUpdate = timestamp;
     }
   
@@ -105,6 +113,3 @@ function loopSimulation(timestamp) {
 // run the program
 createParticles()
 loopSimulation()
-
-// log
-console.log(Particles);
