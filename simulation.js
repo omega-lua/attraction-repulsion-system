@@ -5,7 +5,7 @@ let Particles = [];
 let simulationFrequency = 60;
 let simulationUpdateInterval = 1000 / simulationFrequency;
 let lastSimulationUpdate = 0;
-
+2
 // visual canvas settings
 let canvasFrequency = 60;
 let canvasUpdateInterval = 1000 / canvasFrequency;
@@ -27,7 +27,7 @@ function createParticles() {
       y: canvas.height*0.1 + Math.random() * canvas.height*0.8,
       vx: 0, 
       vy: 0,
-      type: 0, // particle type (unused)
+      type: 0, // particle type
     };
     
     Particles.push(particle);
@@ -52,8 +52,11 @@ function updateSimulation() {
       let dy = Particles[j].y - Particles[i].y;
       let d = Math.sqrt(dx**2 + dy**2);
  
-      //calculate force vectors
+      //attraction and repulsion logic
       let m = 0.3 // multiplier
+      if (d < 200) { m *= -0.3 } //50 is a good value
+
+      //calculate force vectors
       let f = 1/(d+1e-8)*m;  // Add a small value to prevent division by zero
       f = Math.min(f, 0.01);
 
@@ -80,7 +83,7 @@ function updateSimulation() {
     p.vy += forceVectors[i][1] * t;
 
     //introduce friction (1 means no friction, <1 means friction)
-    const friction = 0.99
+    const friction = 0.80
     p.vx *= friction
     p.vy *= friction
 
@@ -131,7 +134,7 @@ function updateCanvas() {
   for (let i = 0; i < n; i++) { drawParticle(Particles[i]) }
   
   //DEBUG: draw force vectors
-  drawForceVectors(Particles);
+  //drawForceVectors(Particles);
 }
 
 function loop(timestamp) {
