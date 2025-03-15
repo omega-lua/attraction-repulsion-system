@@ -3,7 +3,7 @@ let n = 5;
 let nSpecies = 2;
 let Particles = [];
 let simulationFrequency = 30;
-let simulationUpdateInterval = 1000 / simulationFrequency
+let simulationUpdateInterval = 1000 / simulationFrequency;
 let lastSimulationUpdate = 0;
 
 // visual canvas settings
@@ -19,7 +19,6 @@ canvas.height = window.innerHeight;
 
 // initial function for creating particles in an array.
 function createParticles() {
-  console.log("Creating Particles...")
   for (let i = 0; i < n; i++) {
     // Create a particle with random values
     let particle = {
@@ -81,7 +80,7 @@ function drawForceVectors(Particles) {
     let y = particle.y;
 
     // Draw the force vector as a line
-    let multiplier = 5
+    let multiplier = 5;
     ctx.beginPath();
     ctx.moveTo(x, y);  // Start the line from the particle's position
     ctx.lineTo(x + particle.fSum[0]*multiplier, y + particle.fSum[1]*multiplier);  // End the line at the force vector's end
@@ -98,9 +97,9 @@ function updateCanvas() {
 
   //draw particles
   for (let i = 0; i < n; i++) {
-    drawParticle(Particles[i])
+    drawParticle(Particles[i]);
   }
-  drawForceVectors(Particles) //DEBUG
+  drawForceVectors(Particles); //DEBUG
 }
 
 function loop(timestamp) {
@@ -122,5 +121,5 @@ function loop(timestamp) {
 }
 
 // run the program
-createParticles()
-loop()
+createParticles();
+loop();
