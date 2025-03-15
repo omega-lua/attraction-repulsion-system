@@ -1,5 +1,5 @@
 // define variables for simulation
-let n = 5;
+let n = 3;
 let nSpecies = 1;
 let Particles = [];
 let simulationFrequency = 30;
@@ -38,7 +38,12 @@ function createParticles() {
 
 function updateSimulation() {
   
-  //calculate distance and vector for each particle
+  //create forceVectors array
+  let [fx, fy] = [0,0]
+  let forceVectors = [];
+  for (let i = 0; i < n; i++) { forceVectors.push([0,0]) };
+
+  //calculate distance and force vector for each particle
   for (let i = 0; i < n-1; i++) {
     for (let j = i+1; j < n; j++) {
 
@@ -46,29 +51,32 @@ function updateSimulation() {
       let dx = Particles[j].x - Particles[i].x;
       let dy = Particles[j].y - Particles[i].y;
       let d = Math.sqrt(dx**2 + dy**2);
-      
-      //calculate vector sum force (legacy)
-      // let f = (1/d)*(10**2); // force formula (**3.5)
-      // f = (f < 0.05) ? 0 : Math.min(f, 1.2); //if f is less than 0.05, set it to 0. Cannot go bigger than 1.2
+ 
+      //calculate force vectors
+      let m = 0.1
+      let f = 1/(d+1e-8)*m;  // Add a small value to prevent division by zero
+      f = Math.min(f, 0.01);
 
-      //calculate force vector
-      let A = 10000;  // Depth of the potential well (controls strength of attraction/repulsion)
-      let B = 100;    // Equilibrium distance (controls the distance where particles settle)
-      let f = Math.min(((A / Math.pow(d, 2)) - (B / Math.pow(d, 4))), 1.2) // force max = 1.2 based on Lennard-Jones potential
-      
-      //update velocity
-      let [vx, vy] = [(dx/d)*f, (dy/d)*f];
-      Particles[i].vx += vx
-      Particles[i].vy += vy
-      Particles[j].vx -= vx
-      Particles[j].vy -= vy
-    }
-  }
+      //add force vectors
+      fx = (dx/d)*f
+      fy = (dy/d)*f
 
-  // update particle coordinates. The fSum functions as inertia.
+      forceVectors[i][0] += fx
+      forceVectors[i][1] += fy
+      forceVectors[j][0] -= fx
+      forceVectors[j][1] -= fy
+    };
+  };
+
+  // update particle coordinates
+  let t = simulationUpdateInterval
+  tSquared = t**2
+
   for (let i = 0; i < n; i++) {
-    Particles[i].x += Particles[i].vx;
-    Particles[i].y += Particles[i].vy;
+    Particles[i].x = Particles[i].x + 0.5*forceVectors[i][0]*tSquared + (Particles[i].vx*t)
+    Particles[i].y = Particles[i].y + 0.5*forceVectors[i][1]*tSquared + (Particles[i].vy*t)
+    Particles[i].vx += forceVectors[i][0] * t
+    Particles[i].vy += forceVectors[i][1]* t
   };
 }
 
@@ -88,12 +96,12 @@ function drawForceVectors(Particles) {
     let y = particle.y;
 
     // Draw the force vector as a line
-    let multiplier = 5;
+    let multiplier = 20;
     ctx.beginPath();
     ctx.moveTo(x, y);  // Start the line from the particle's position
     ctx.lineTo(x + particle.vx * multiplier, y + particle.vy * multiplier);  // End the line at the force vector's end
     ctx.strokeStyle = 'red';  // Color of the force vector line
-    ctx.lineWidth = 2;  // Line thickness
+    ctx.lineWidth = 4;  // Line thickness
     ctx.stroke();
   });
 }
