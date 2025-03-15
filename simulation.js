@@ -28,7 +28,6 @@ function createParticles() {
       vx: 0, 
       vy: 0,
       type: 0, // particle type (unused)
-      fSum: [0,0] // sum of forces, used for force calculation
     };
     
     Particles.push(particle);
@@ -48,26 +47,28 @@ function updateSimulation() {
       let dy = Particles[j].y - Particles[i].y;
       let d = Math.sqrt(dx**2 + dy**2);
       
-      //calculate vector sum force
+      //calculate vector sum force (legacy)
       // let f = (1/d)*(10**2); // force formula (**3.5)
       // f = (f < 0.05) ? 0 : Math.min(f, 1.2); //if f is less than 0.05, set it to 0. Cannot go bigger than 1.2
 
+      //calculate force vector
       let A = 10000;  // Depth of the potential well (controls strength of attraction/repulsion)
       let B = 100;    // Equilibrium distance (controls the distance where particles settle)
-      f = Math.min(((A / Math.pow(d, 2)) - (B / Math.pow(d, 4))), 1.2) // force max = 1.2 based on Lennard-Jones potential
-      //console.log(f)
-
-      let vector = [(dx/d)*f, (dy/d)*f]; //normal vector is in bracket, then multiplied by force 
+      let f = Math.min(((A / Math.pow(d, 2)) - (B / Math.pow(d, 4))), 1.2) // force max = 1.2 based on Lennard-Jones potential
       
-      Particles[i].fSum = Particles[i].fSum.map((value, index) => value + vector[index]);
-      Particles[j].fSum = Particles[j].fSum.map((value, index) => value - vector[index]);
+      //update velocity
+      let [vx, vy] = [(dx/d)*f, (dy/d)*f];
+      Particles[i].vx += vx
+      Particles[i].vy += vy
+      Particles[j].vx -= vx
+      Particles[j].vy -= vy
     }
   }
 
   // update particle coordinates. The fSum functions as inertia.
   for (let i = 0; i < n; i++) {
-    Particles[i].x += Particles[i].fSum[0];
-    Particles[i].y += Particles[i].fSum[1];
+    Particles[i].x += Particles[i].vx;
+    Particles[i].y += Particles[i].vy;
   };
 }
 
@@ -90,7 +91,7 @@ function drawForceVectors(Particles) {
     let multiplier = 5;
     ctx.beginPath();
     ctx.moveTo(x, y);  // Start the line from the particle's position
-    ctx.lineTo(x + particle.fSum[0]*multiplier, y + particle.fSum[1]*multiplier);  // End the line at the force vector's end
+    ctx.lineTo(x + particle.vx * multiplier, y + particle.vy * multiplier);  // End the line at the force vector's end
     ctx.strokeStyle = 'red';  // Color of the force vector line
     ctx.lineWidth = 2;  // Line thickness
     ctx.stroke();
