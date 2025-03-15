@@ -1,13 +1,13 @@
 // define variables for simulation
-let n = 5;
+let n = 10;
 let nSpecies = 1;
 let Particles = [];
-let simulationFrequency = 30;
+let simulationFrequency = 60;
 let simulationUpdateInterval = 1000 / simulationFrequency;
 let lastSimulationUpdate = 0;
 
 // visual canvas settings
-let canvasFrequency = 30;
+let canvasFrequency = 60;
 let canvasUpdateInterval = 1000 / canvasFrequency;
 let lastCanvasUpdate = 0;
 
@@ -67,24 +67,31 @@ function updateSimulation() {
     };
   };
 
-  // update particle coordinates (using fomrula x(t)= 0.5*a*t^2 + v0*t + x0)
+  //update particles
   let t = simulationUpdateInterval
   tSquared = t**2
   Particles.forEach((p, i) => {
-    p.x += 0.5 * forceVectors[i][0] * tSquared + p.vx * t;
-    p.y += 0.5 * forceVectors[i][1] * tSquared + p.vy * t;
+    // update particle coordinates (using fomrula x(t)= 0.5*a*t^2 + v0*t + x0)
+    p.x += 0.5 * (forceVectors[i][0] * tSquared) + p.vx * t;
+    p.y += 0.5 * (forceVectors[i][1] * tSquared) + p.vy * t;
 
+    //update velocities
     p.vx += forceVectors[i][0] * t;
     p.vy += forceVectors[i][1] * t;
 
-    // create virtual borders
+    //introduce friction (1 means no friction, <1 means friction)
+    const friction = 0.99
+    p.vx *= friction
+    p.vy *= friction
+
+    // constrain particles to within visible canvas
     if (p.x < 0 || p.x > canvas.width) {
-      p.x = p.x < 0 ? 0 : canvas.width; // Correct position
-      p.vx *= -0.2; // Reverse velocity
+      p.x = p.x < 0 ? 0 : canvas.width;
+      p.vx *= -0.2;
     }
     if (p.y < 0 || p.y > canvas.height) {
-      p.y = p.y < 0 ? 0 : canvas.height; // Correct position
-      p.vy *= -0.2; // Reverse velocity
+      p.y = p.y < 0 ? 0 : canvas.height;
+      p.vy *= -0.2;
     }
   });
 }
@@ -105,12 +112,12 @@ function drawForceVectors(Particles) {
     let y = particle.y;
 
     // Draw the force vector as a line
-    let multiplier = 20;
+    let multiplier = 50;
     ctx.beginPath();
     ctx.moveTo(x, y);  // Start the line from the particle's position
     ctx.lineTo(x + particle.vx * multiplier, y + particle.vy * multiplier);  // End the line at the force vector's end
     ctx.strokeStyle = 'red';  // Color of the force vector line
-    ctx.lineWidth = 4;  // Line thickness
+    ctx.lineWidth = 2;  // Line thickness
     ctx.stroke();
   });
 }
