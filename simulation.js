@@ -1,5 +1,5 @@
 // define variables for simulation
-let n = 3;
+let n = 5;
 let nSpecies = 1;
 let Particles = [];
 let simulationFrequency = 30;
@@ -53,14 +53,13 @@ function updateSimulation() {
       let d = Math.sqrt(dx**2 + dy**2);
  
       //calculate force vectors
-      let m = 0.1
+      let m = 0.3 // multiplier
       let f = 1/(d+1e-8)*m;  // Add a small value to prevent division by zero
       f = Math.min(f, 0.01);
 
       //add force vectors
       fx = (dx/d)*f
       fy = (dy/d)*f
-
       forceVectors[i][0] += fx
       forceVectors[i][1] += fy
       forceVectors[j][0] -= fx
@@ -68,16 +67,26 @@ function updateSimulation() {
     };
   };
 
-  // update particle coordinates
+  // update particle coordinates (using fomrula x(t)= 0.5*a*t^2 + v0*t + x0)
   let t = simulationUpdateInterval
   tSquared = t**2
+  Particles.forEach((p, i) => {
+    p.x += 0.5 * forceVectors[i][0] * tSquared + p.vx * t;
+    p.y += 0.5 * forceVectors[i][1] * tSquared + p.vy * t;
 
-  for (let i = 0; i < n; i++) {
-    Particles[i].x = Particles[i].x + 0.5*forceVectors[i][0]*tSquared + (Particles[i].vx*t)
-    Particles[i].y = Particles[i].y + 0.5*forceVectors[i][1]*tSquared + (Particles[i].vy*t)
-    Particles[i].vx += forceVectors[i][0] * t
-    Particles[i].vy += forceVectors[i][1]* t
-  };
+    p.vx += forceVectors[i][0] * t;
+    p.vy += forceVectors[i][1] * t;
+
+    // create virtual borders
+    if (p.x < 0 || p.x > canvas.width) {
+      p.x = p.x < 0 ? 0 : canvas.width; // Correct position
+      p.vx *= -0.2; // Reverse velocity
+    }
+    if (p.y < 0 || p.y > canvas.height) {
+      p.y = p.y < 0 ? 0 : canvas.height; // Correct position
+      p.vy *= -0.2; // Reverse velocity
+    }
+  });
 }
 
 // function for drawing a particle.
