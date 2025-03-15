@@ -1,12 +1,15 @@
 // define variables for simulation
-let n = 10;
+let n = 5;
 let nSpecies = 2;
-let Particles = []
+let Particles = [];
+let simulationFrequency = 30;
+let simulationUpdateInterval = 1000 / simulationFrequency
+let lastSimulationUpdate = 0;
 
 // visual canvas settings
-let lastUpdate = 0;
-let updateInterval = 1000 / 1; // 30 updates per second
-let particleSize = 25
+let canvasFrequency = 30;
+let canvasUpdateInterval = 1000 / canvasFrequency;
+let lastCanvasUpdate = 0;
 
 //setting up canvas
 const canvas = document.getElementById('canvas');
@@ -16,6 +19,7 @@ canvas.height = window.innerHeight;
 
 // initial function for creating particles in an array.
 function createParticles() {
+  console.log("Creating Particles...")
   for (let i = 0; i < n; i++) {
     // Create a particle with random values
     let particle = {
@@ -29,14 +33,13 @@ function createParticles() {
     
     Particles.push(particle);
   }
-
   return Particles;
 }
 
 
 function updateSimulation() {
   
-  //calculate for each particle
+  //calculate distance and vector for each particle
   for (let i = 0; i < n-1; i++) {
     for (let j = i+1; j < n; j++) {
       // calculate distance
@@ -44,20 +47,27 @@ function updateSimulation() {
       let dy = Particles[j].y - Particles[i].y;
       let d = Math.sqrt(dx**2 + dy**2);
       
-      //calculate vector sum fo
-      let f = (1/d)*(10**3.5); // force formula
+      //calculate vector sum force
+      let f = (1/d)*(10**2); // force formula (**3.5)
+      f = Math.min(f, 1.2);
       let vector = [(dx/d)*f, (dy/d)*f]; //normal vector is in bracket, then multiplied by force 
       
       Particles[i].fSum = Particles[i].fSum.map((value, index) => value + vector[index]);
       Particles[j].fSum = Particles[j].fSum.map((value, index) => value - vector[index]);
-      
     }
   }
-  console.log(Particles)
+
+  // update particle coordinates
+  for (let i = 0; i < n; i++) {
+    Particles[i].x += Particles[i].fSum[0];
+    Particles[i].y += Particles[i].fSum[1];
+    //Particles[i].fSum = [0,0]; // Worked without this, the vector that gets reused next update functions as 
+  };
 }
 
 // function for drawing a particle.
 function drawParticle(particle) {
+  let particleSize = 20;
   ctx.beginPath();
   ctx.arc(particle.x, particle.y, particleSize, 0, Math.PI * 2);
   ctx.fillStyle = "black";
@@ -71,45 +81,46 @@ function drawForceVectors(Particles) {
     let y = particle.y;
 
     // Draw the force vector as a line
-    console.log(particle.fSum)
+    let multiplier = 5
     ctx.beginPath();
     ctx.moveTo(x, y);  // Start the line from the particle's position
-    ctx.lineTo(x + particle.fSum[0], y + particle.fSum[1]);  // End the line at the force vector's end
+    ctx.lineTo(x + particle.fSum[0]*multiplier, y + particle.fSum[1]*multiplier);  // End the line at the force vector's end
     ctx.strokeStyle = 'red';  // Color of the force vector line
     ctx.lineWidth = 2;  // Line thickness
     ctx.stroke();
   });
 }
 
-// upates visuals at every frame
+// upates canvas
 function updateCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height); //clear canvas
+  //clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let i = 0; i < n; i++) { //draw particles
+  //draw particles
+  for (let i = 0; i < n; i++) {
     drawParticle(Particles[i])
   }
-  drawForceVectors(Particles)
+  drawForceVectors(Particles) //DEBUG
 }
 
-function loopSimulation(timestamp) {
-    // updates simulation after a certain period of time.
-    if (timestamp - lastUpdate >= updateInterval) {
-      
-      // update simulation
+function loop(timestamp) {
+    // updates simulation
+    if (timestamp - lastSimulationUpdate >= simulationUpdateInterval) {
       updateSimulation();
+      lastSimulationUpdate = timestamp;
+    }
 
-      // update canvas
+    // updates canvas
+    if (timestamp - lastCanvasUpdate >= canvasUpdateInterval) {
       updateCanvas();
-
-      throw new Error("DEBUG: Stops after 1 simulation loop."); // DEBUG
-      lastUpdate = timestamp;
+      lastCanvasUpdate = timestamp;
+      //return //to run loop only once
     }
   
     // tell browser to call function at every frame
-    requestAnimationFrame(loopSimulation);
+    requestAnimationFrame(loop);
 }
-
 
 // run the program
 createParticles()
-loopSimulation()
+loop()
