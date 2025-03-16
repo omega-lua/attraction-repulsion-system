@@ -1,12 +1,13 @@
 // Variables for particles
-let n = 20;
+let n = 10;
 let Particles = [];
 
 // Variables for types
-let nTypes = 4;
+let nTypes = 3;
 let Types = [];
 
 // Simulation settings
+let simulationSpeed = 2 //should stay on value 1
 let simulationFrequency = 60;
 let simulationUpdateInterval = 1000 / simulationFrequency;
 let lastSimulationUpdate = 0;
@@ -17,18 +18,18 @@ let canvasFrequency = 60;
 let canvasUpdateInterval = 1000 / canvasFrequency;
 let lastCanvasUpdate = 0;
 let showForceVectors = false;
-let typeColours = ["blue", "green", "red", "cyan", "indigo", "lime", "magenta", "maroon", "navy", "orange", "pink", "purple", "silver", "white", "yellow"]
+let typeColours = ["#A04747", "#D8A25E", "#EEDF7A", "indigo", "lime", "magenta", "maroon", "navy", "orange", "pink", "purple", "silver", "white", "yellow"]
 
 // Setting up canvas
 const canvas = document.getElementById('canvas');
-canvas.style.backgroundColor = "#1a1a1a";
+canvas.style.backgroundColor = "#343131";
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 // ------------------------------------------------- //
 
-// initial function for creating particles in an array.
+// Initial function for creating particles in an array.
 function createParticles() {
   for (let i = 0; i < n; i++) {
     
@@ -59,32 +60,33 @@ function createParticles() {
 
 function updateSimulation() {
   
-  //create forceVectors array
+  // create forceVectors array
   let [fx, fy] = [0,0]
   let forceVectors = [];
   for (let i = 0; i < n; i++) { forceVectors.push([0,0]) };
 
-  //calculate distance and force vector for each particle
+  // Calculate distance and force vector for each particle
   for (let i = 0; i < n-1; i++) {
     for (let j = i+1; j < n; j++) {
 
-      // calculate distance
+      // Calculate distance
       let dx = Particles[j].x - Particles[i].x;
       let dy = Particles[j].y - Particles[i].y;
       let d = Math.sqrt(dx**2 + dy**2);
  
-      //attraction and repulsion logic
+      // Equillibiurm logic
       let m = 0.3 // multiplier
       if (d < 200) { m *= -0.3 } //50 is a good value
 
-      //calculate force vectors
+      // Calculate force vectors
       let f = 1/(d+1e-8)*m;  // Add a small value to prevent division by zero
-      f = Math.min(f, 0.01);
+      f = Math.min(f, 0.005);
 
-      //add force vectors
+      // Add force vectors
       fx = (dx/d)*f
       fy = (dy/d)*f
 
+      // Attraction and repulsion logic
       let iType = Particles[i].type
       let jType = Particles[j].type
       let iModifier = Types[iType][jType]
@@ -98,24 +100,24 @@ function updateSimulation() {
     };
   };
 
-  //update particles
-  let t = simulationUpdateInterval
+  // Update particles
+  let t = simulationUpdateInterval * simulationSpeed
   tSquared = t**2
   Particles.forEach((p, i) => {
-    // update particle coordinates (using fomrula x(t)= 0.5*a*t^2 + v0*t + x0)
+    // Update particle coordinates (using fomrula x(t)= 0.5*a*t^2 + v0*t + x0)
     p.x += 0.5 * (forceVectors[i][0] * tSquared) + p.vx * t;
     p.y += 0.5 * (forceVectors[i][1] * tSquared) + p.vy * t;
 
-    //update velocities
+    // Update velocities
     p.vx += forceVectors[i][0] * t;
     p.vy += forceVectors[i][1] * t;
 
-    //introduce friction (1 means no friction, <1 means friction)
-    const friction = 0.80
+    // Introduce friction (1 means no friction, <1 means friction)
+    const friction = 0.20 // low value prevents oscillating in stable arrangments.
     p.vx *= friction
     p.vy *= friction
 
-    // constrain particles to within visible canvas
+    // Constrain particles to within visible canvas
     if (p.x < 0 || p.x > canvas.width) {
       p.x = p.x < 0 ? 0 : canvas.width;
       p.vx *= -0.2;
@@ -127,7 +129,7 @@ function updateSimulation() {
   });
 }
 
-// function for drawing a particle.
+// Function for drawing a particle.
 function drawParticle(particle) {
   let particleSize = 15;
   ctx.beginPath();
@@ -136,7 +138,7 @@ function drawParticle(particle) {
   ctx.fill();
 }
 
-// debug function for visualizing force vectors
+// Debug function for visualizing force vectors
 function drawForceVectors(Particles) {
   Particles.forEach((particle) => {
     let x = particle.x;
@@ -153,7 +155,7 @@ function drawForceVectors(Particles) {
   });
 }
 
-// upates canvas
+// Updates canvas
 function updateCanvas() {
   //clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -165,6 +167,7 @@ function updateCanvas() {
   if (showForceVectors) { drawForceVectors(Particles) }
 }
 
+// Main loop
 function loop(timestamp) {
     // updates simulation
     if (timestamp - lastSimulationUpdate >= simulationUpdateInterval) {
@@ -182,7 +185,7 @@ function loop(timestamp) {
     animationID = requestAnimationFrame(loop);
 }
 
-// functions for UI elements
+// Functions for UI elements
 function stopLoop() {
   cancelAnimationFrame(animationID); // Stop animation loop
   console.log("Animation stopped.");
@@ -192,6 +195,6 @@ function toggleForceVectors() {
   showForceVectors = !showForceVectors;
 }
 
-// run the program
+// Run the program
 createParticles();
 loop();
