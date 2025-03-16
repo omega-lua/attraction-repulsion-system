@@ -5,11 +5,13 @@ let Particles = [];
 let simulationFrequency = 60;
 let simulationUpdateInterval = 1000 / simulationFrequency;
 let lastSimulationUpdate = 0;
-2
+let animationID;
+
 // visual canvas settings
 let canvasFrequency = 60;
 let canvasUpdateInterval = 1000 / canvasFrequency;
 let lastCanvasUpdate = 0;
+let showForceVectors = false;
 
 //setting up canvas
 const canvas = document.getElementById('canvas');
@@ -115,7 +117,7 @@ function drawForceVectors(Particles) {
     let y = particle.y;
 
     // Draw the force vector as a line
-    let multiplier = 50;
+    let multiplier = 60;
     ctx.beginPath();
     ctx.moveTo(x, y);  // Start the line from the particle's position
     ctx.lineTo(x + particle.vx * multiplier, y + particle.vy * multiplier);  // End the line at the force vector's end
@@ -134,7 +136,7 @@ function updateCanvas() {
   for (let i = 0; i < n; i++) { drawParticle(Particles[i]) }
   
   //DEBUG: draw force vectors
-  //drawForceVectors(Particles);
+  if (showForceVectors) { drawForceVectors(Particles) }
 }
 
 function loop(timestamp) {
@@ -148,11 +150,20 @@ function loop(timestamp) {
     if (timestamp - lastCanvasUpdate >= canvasUpdateInterval) {
       updateCanvas();
       lastCanvasUpdate = timestamp;
-      //return //to run loop only once
     }
   
     // tell browser to call function at every frame
-    requestAnimationFrame(loop);
+    animationID = requestAnimationFrame(loop);
+}
+
+// functions for UI elements
+function stopLoop() {
+  cancelAnimationFrame(animationID); // Stop animation loop
+  console.log("Animation stopped.");
+}
+
+function toggleForceVectors() {
+  showForceVectors = !showForceVectors;
 }
 
 // run the program
