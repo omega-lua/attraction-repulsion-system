@@ -3,7 +3,7 @@ let n = 20;
 let Particles = [];
 
 // Variables for types
-let nTypes = 4;
+let nTypes = 3;
 let Types = [];
 
 // Simulation settings
@@ -188,10 +188,15 @@ function loop(timestamp) {
     animationID = requestAnimationFrame(loop);
 }
 
-// Functions for UI elements
+// Start loop
+function startLoop() {
+  if (!animationID) { animationID = requestAnimationFrame(loop) }
+}
+
+// Stop loop
 function stopLoop() {
-  cancelAnimationFrame(animationID); // Stop animation loop
-  console.log("Animation stopped.");
+  cancelAnimationFrame(animationID);
+  animationID = null;
 }
 
 function toggleForceVectors() {
