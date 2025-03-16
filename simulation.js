@@ -22,10 +22,20 @@ let typeColours = ["#A04747", "#D8A25E", "#EEDF7A", "indigo", "lime", "magenta",
 
 // Setting up canvas
 const canvas = document.getElementById('canvas');
-canvas.style.backgroundColor = "#343131";
 const ctx = canvas.getContext('2d');
+const controls = document.getElementById("controls");
+canvas.style.backgroundColor = "#343131";
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+// Set canvas size dynamically
+function resizeCanvas() {
+  canvas.width = window.innerWidth - controls.offsetWidth;
+  canvas.height = window.innerHeight;
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas(); // Call on load
 
 // ------------------------------------------------- //
 
@@ -188,9 +198,14 @@ function loop(timestamp) {
     animationID = requestAnimationFrame(loop);
 }
 
-// Start loop
-function startLoop() {
-  if (!animationID) { animationID = requestAnimationFrame(loop) }
+// pause and unpause loop
+function pauseLoop() {
+  if (!animationID) {
+    animationID = requestAnimationFrame(loop);
+  } else {
+    cancelAnimationFrame(animationID);
+    animationID = null;
+  }
 }
 
 // Stop loop
@@ -209,6 +224,16 @@ function toggleForceVectors() {
 //   n = nSlider.value;
 //   nValue.textContent = n;  // Update the displayed value
 // });
+
+const nSlider = document.getElementById("nSlider");
+const nValue = document.getElementById("nValue");
+
+// Update the span when the slider moves
+nSlider.addEventListener("input", function () {
+  pauseLoop()
+  n = nValue.textContent = nSlider.value;
+  location.reload()
+});
 
 // Run the program
 function runSimulation() {
