@@ -1,42 +1,61 @@
-// define variables for simulation
-let n = 10;
-let nSpecies = 1;
+// Variables for particles
+let n = 20;
 let Particles = [];
+
+// Variables for types
+let nTypes = 4;
+let Types = [];
+
+// Simulation settings
 let simulationFrequency = 60;
 let simulationUpdateInterval = 1000 / simulationFrequency;
 let lastSimulationUpdate = 0;
 let animationID;
 
-// visual canvas settings
+// Visual canvas settings
 let canvasFrequency = 60;
 let canvasUpdateInterval = 1000 / canvasFrequency;
 let lastCanvasUpdate = 0;
 let showForceVectors = false;
+let typeColours = ["blue", "green", "red", "cyan", "indigo", "lime", "magenta", "maroon", "navy", "orange", "pink", "purple", "silver", "white", "yellow"]
 
-//setting up canvas
+// Setting up canvas
 const canvas = document.getElementById('canvas');
 canvas.style.backgroundColor = "#1a1a1a";
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+// ------------------------------------------------- //
+
 // initial function for creating particles in an array.
 function createParticles() {
   for (let i = 0; i < n; i++) {
+    
     // Create a particle with random values
     let particle = {
       x: canvas.width*0.1 + Math.random() * canvas.width*0.8,
       y: canvas.height*0.1 + Math.random() * canvas.height*0.8,
       vx: 0, 
       vy: 0,
-      type: 0, // particle type
+      type: Math.floor(Math.random()*nTypes), // particle type
     };
     
     Particles.push(particle);
   }
+
+  // Create particle types
+  for (let i = 0; i < nTypes; i++) {
+    let array = []
+    for (let j = 0; j < nTypes; j++) {
+      let relation = Math.floor(Math.random()*3)-1
+      array.push(relation)
+    }
+    Types.push(array)
+  }
+
   return Particles;
 }
-
 
 function updateSimulation() {
   
@@ -65,10 +84,17 @@ function updateSimulation() {
       //add force vectors
       fx = (dx/d)*f
       fy = (dy/d)*f
-      forceVectors[i][0] += fx
-      forceVectors[i][1] += fy
-      forceVectors[j][0] -= fx
-      forceVectors[j][1] -= fy
+
+      let iType = Particles[i].type
+      let jType = Particles[j].type
+      let iModifier = Types[iType][jType]
+      let jModifier = Types[jType][iType]
+
+      forceVectors[i][0] += fx * iModifier
+      forceVectors[i][1] += fy * iModifier
+
+      forceVectors[j][0] -= fx * jModifier
+      forceVectors[j][1] -= fy * jModifier
     };
   };
 
@@ -103,10 +129,10 @@ function updateSimulation() {
 
 // function for drawing a particle.
 function drawParticle(particle) {
-  let particleSize = 20;
+  let particleSize = 15;
   ctx.beginPath();
   ctx.arc(particle.x, particle.y, particleSize, 0, Math.PI * 2);
-  ctx.fillStyle = "white";
+  ctx.fillStyle = typeColours[particle.type];
   ctx.fill();
 }
 
@@ -117,7 +143,7 @@ function drawForceVectors(Particles) {
     let y = particle.y;
 
     // Draw the force vector as a line
-    let multiplier = 60;
+    let multiplier = 80;
     ctx.beginPath();
     ctx.moveTo(x, y);  // Start the line from the particle's position
     ctx.lineTo(x + particle.vx * multiplier, y + particle.vy * multiplier);  // End the line at the force vector's end
