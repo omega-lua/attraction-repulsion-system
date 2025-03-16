@@ -199,11 +199,11 @@ function toggleForceVectors() {
 }
 
 // Update n value when slider is changed
-const nSlider = document.getElementById('nSlider');
-nSlider.addEventListener('input', () => {
-  n = nSlider.value;
-  nValue.textContent = n;  // Update the displayed value
-});
+// const nSlider = document.getElementById('nSlider');
+// nSlider.addEventListener('input', () => {
+//   n = nSlider.value;
+//   nValue.textContent = n;  // Update the displayed value
+// });
 
 // Run the program
 function runSimulation() {
