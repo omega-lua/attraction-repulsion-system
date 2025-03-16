@@ -1,5 +1,6 @@
+import { n, setParticleCount} from "./config.js";
+
 // Variables for particles
-let n = 20;
 let Particles = [];
 
 // Variables for types
@@ -10,34 +11,8 @@ let Types = [];
 let simulationSpeed = 1 //should stay on value 1
 let simulationFrequency = 30;
 let simulationUpdateInterval = 1000 / simulationFrequency;
-let lastSimulationUpdate = 0;
-let animationID;
 
-// Visual canvas settings
-let canvasFrequency = 30;
-let canvasUpdateInterval = 1000 / canvasFrequency;
-let lastCanvasUpdate = 0;
-let showForceVectors = false;
-let typeColours = ["#A04747", "#D8A25E", "#EEDF7A", "indigo", "lime", "magenta", "maroon", "navy", "orange", "pink", "purple", "silver", "white", "yellow"]
-
-// Setting up canvas
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const controls = document.getElementById("controls");
-canvas.style.backgroundColor = "#343131";
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// Set canvas size dynamically
-function resizeCanvas() {
-  canvas.width = window.innerWidth - controls.offsetWidth;
-  canvas.height = window.innerHeight;
-}
-
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas(); // Call on load
-
-// ------------------------------------------------- //
+// --------------- Functions --------------- //
 
 // Initial function for creating particles in an array.
 function createParticles() {
@@ -115,7 +90,7 @@ function updateSimulation() {
 
   // Update particles
   let t = simulationUpdateInterval * simulationSpeed
-  tSquared = t**2
+  let tSquared = t**2
   Particles.forEach((p, i) => {
     // Update particle coordinates (using fomrula x(t)= 0.5*a*t^2 + v0*t + x0)
     p.x += 0.5 * (forceVectors[i][0] * tSquared) + p.vx * t;
@@ -142,103 +117,5 @@ function updateSimulation() {
   });
 }
 
-// Function for drawing a particle.
-function drawParticle(particle) {
-  let particleSize = 15;
-  ctx.beginPath();
-  ctx.arc(particle.x, particle.y, particleSize, 0, Math.PI * 2);
-  ctx.fillStyle = typeColours[particle.type];
-  ctx.fill();
-}
-
-// Debug function for visualizing force vectors
-function drawForceVectors(Particles) {
-  Particles.forEach((particle) => {
-    let x = particle.x;
-    let y = particle.y;
-
-    // Draw the force vector as a line
-    let multiplier = 80;
-    ctx.beginPath();
-    ctx.moveTo(x, y);  // Start the line from the particle's position
-    ctx.lineTo(x + particle.vx * multiplier, y + particle.vy * multiplier);  // End the line at the force vector's end
-    ctx.strokeStyle = 'red';  // Color of the force vector line
-    ctx.lineWidth = 2;  // Line thickness
-    ctx.stroke();
-  });
-}
-
-// Updates canvas
-function updateCanvas() {
-  //clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  //draw particles
-  for (let i = 0; i < n; i++) { drawParticle(Particles[i]) }
-  
-  //DEBUG: draw force vectors
-  if (showForceVectors) { drawForceVectors(Particles) }
-}
-
-// Main loop
-function loop(timestamp) {
-    // updates simulation
-    if (timestamp - lastSimulationUpdate >= simulationUpdateInterval) {
-      updateSimulation();
-      lastSimulationUpdate = timestamp;
-    }
-
-    // updates canvas
-    if (timestamp - lastCanvasUpdate >= canvasUpdateInterval) {
-      updateCanvas();
-      lastCanvasUpdate = timestamp;
-    }
-  
-    // tell browser to call function at every frame
-    animationID = requestAnimationFrame(loop);
-}
-
-// pause and unpause loop
-function pauseLoop() {
-  if (!animationID) {
-    animationID = requestAnimationFrame(loop);
-  } else {
-    cancelAnimationFrame(animationID);
-    animationID = null;
-  }
-}
-
-// Stop loop
-function stopLoop() {
-  cancelAnimationFrame(animationID);
-  animationID = null;
-}
-
-function toggleForceVectors() {
-  showForceVectors = !showForceVectors;
-}
-
-// Update n value when slider is changed
-// const nSlider = document.getElementById('nSlider');
-// nSlider.addEventListener('input', () => {
-//   n = nSlider.value;
-//   nValue.textContent = n;  // Update the displayed value
-// });
-
-const nSlider = document.getElementById("nSlider");
-const nValue = document.getElementById("nValue");
-
-// Update the span when the slider moves
-nSlider.addEventListener("input", function () {
-  pauseLoop()
-  n = nValue.textContent = nSlider.value;
-  location.reload()
-});
-
-// Run the program
-function runSimulation() {
-  createParticles();
-  loop();
-}
-
-runSimulation()
+// Export the function to make it available to other files
+export { createParticles, updateSimulation, simulationUpdateInterval };
