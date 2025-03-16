@@ -1,20 +1,20 @@
 // Variables for particles
-let n = 10;
+let n = 20;
 let Particles = [];
 
 // Variables for types
-let nTypes = 3;
+let nTypes = 4;
 let Types = [];
 
 // Simulation settings
-let simulationSpeed = 2 //should stay on value 1
-let simulationFrequency = 60;
+let simulationSpeed = 1 //should stay on value 1
+let simulationFrequency = 30;
 let simulationUpdateInterval = 1000 / simulationFrequency;
 let lastSimulationUpdate = 0;
 let animationID;
 
 // Visual canvas settings
-let canvasFrequency = 60;
+let canvasFrequency = 30;
 let canvasUpdateInterval = 1000 / canvasFrequency;
 let lastCanvasUpdate = 0;
 let showForceVectors = false;
@@ -74,9 +74,12 @@ function updateSimulation() {
       let dy = Particles[j].y - Particles[i].y;
       let d = Math.sqrt(dx**2 + dy**2);
  
+      // only near particles influence each other
+      if (d > 300) { continue }
+
       // Equillibiurm logic
       let m = 0.3 // multiplier
-      if (d < 200) { m *= -0.3 } //50 is a good value
+      if (d < 100) { m *= -0.3 } //50 is a good value
 
       // Calculate force vectors
       let f = 1/(d+1e-8)*m;  // Add a small value to prevent division by zero
@@ -195,6 +198,17 @@ function toggleForceVectors() {
   showForceVectors = !showForceVectors;
 }
 
+// Update n value when slider is changed
+const nSlider = document.getElementById('nSlider');
+nSlider.addEventListener('input', () => {
+  n = nSlider.value;
+  nValue.textContent = n;  // Update the displayed value
+});
+
 // Run the program
-createParticles();
-loop();
+function runSimulation() {
+  createParticles();
+  loop();
+}
+
+runSimulation()
