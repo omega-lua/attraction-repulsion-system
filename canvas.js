@@ -1,5 +1,5 @@
 import { n, setParticleCount} from "./config.js";
-import { Particles  } from "./simulation.js";
+import { Particles } from "./simulation.js";
 
 // canvas settings
 let canvasFrequency = 30;
@@ -30,10 +30,11 @@ resizeCanvas(); // Call on load
 
 // Update the span when the slider moves
 nSlider.addEventListener("input", function () {
-  pauseLoop()
-  n = nValue.textContent = nSlider.value;
-  location.reload()
+  let newValue = nValue.textContent = nSlider.value
+  setParticleCount(newValue);
+  // resetSimulation
 });
+
 
 // Function for drawing a particle.
 function drawParticle(particle) {

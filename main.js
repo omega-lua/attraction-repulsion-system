@@ -41,9 +41,9 @@ function stopLoop() {
 }
 
 // Run the program
-function runSimulation() {
+function runProgram() {
   createParticles();
   loop();
 }
 
-runSimulation()
+runProgram()
