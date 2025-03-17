@@ -16,6 +16,7 @@ let simulationUpdateInterval = 1000 / simulationFrequency;
 
 // Initial function for creating particles in an array.
 function createParticles() {
+  Particles = [] // reset Particles array
   for (let i = 0; i < n; i++) {
     
     // Create a particle with random values

@@ -15,26 +15,11 @@ canvas.style.backgroundColor = "#343131";
 canvas.width = window.innerWidth; //DEBUG: Are these necessary?
 canvas.height = window.innerHeight;
 
-// Setting up UI element handles
-const nSlider = document.getElementById("nSlider");
-const nValue = document.getElementById("nValue");
-
 // Set canvas size dynamically
 function resizeCanvas() {
   canvas.width = window.innerWidth - controls.offsetWidth;
   canvas.height = window.innerHeight;
 }
-
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas(); // Call on load
-
-// Update the span when the slider moves
-nSlider.addEventListener("input", function () {
-  let newValue = nValue.textContent = nSlider.value
-  setParticleCount(newValue);
-  // resetSimulation
-});
-
 
 // Function for drawing a particle.
 function drawParticle(particle) {
@@ -74,8 +59,13 @@ function updateCanvas() {
   if (showForceVectors) { drawForceVectors(Particles) }
 }
 
-function toggleForceVectors() {
-  showForceVectors = !showForceVectors;
-}
+// Debug function for showing force vectors of particles
+function toggleForceVectors() { showForceVectors = !showForceVectors; }
+
+// Add eventlisteners
+document.getElementById("toggleForceVectorsButton").addEventListener("click", toggleForceVectors);
+window.addEventListener("resize", resizeCanvas);
+
+resizeCanvas(); // Call on load
 
 export { updateCanvas, canvasUpdateInterval  };

@@ -31,6 +31,12 @@
             display: block;
         }
     </style>
+
+    <!-- Import JavaScript modules after HTML file is fully parsed -->
+    <script type="module" src="main.js" defer></script>
+    <script type="module" src="canvas.js" defer></script>
+    <script type="module" src="simulation.js" defer></script>
+    <script type="module" src="config.js" defer></script>
 </head>
 <body>
     <canvas id="canvas"></canvas>
@@ -46,14 +52,9 @@
             <input type="range" id="simulationSpeedSlider" min="0" max="5" step="0.2" value="1">
             <span id="simulationSpeedValue">1</span>
         </div>
-        <button onclick="location.reload()">Reset</button>
-        <button onclick="pauseLoop()">Pause</button>
-        <button onclick="toggleForceVectors()">toggle Force Vectors</button>
+        <button id="resetButton">Reset</button>
+        <button id="pauseButton">Pause</button>
+        <button id="toggleForceVectorsButton">toggle Force Vectors</button>
     </div>
-
-    <!-- Import JavaScript modules -->
-    <script type="module" src="main.js"></script>
-    <script type="module" src="canvas.js"></script>
-    <script type="module" src="simulation.js"></script>
 </body>
 </html>
