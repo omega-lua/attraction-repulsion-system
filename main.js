@@ -27,7 +27,6 @@ function loop(timestamp) {
 
 // pause and unpause loop
 function pauseLoop() {
-  console.log(animationID)
   if (animationID) {
     cancelAnimationFrame(animationID);
     animationID = null;
