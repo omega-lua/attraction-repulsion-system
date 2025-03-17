@@ -1,4 +1,5 @@
 import { n, setParticleCount} from "./config.js";
+import { Particles  } from "./simulation.js";
 
 // canvas settings
 let canvasFrequency = 30;

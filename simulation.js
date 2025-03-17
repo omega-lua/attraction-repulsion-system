@@ -118,4 +118,4 @@ function updateSimulation() {
 }
 
 // Export the function to make it available to other files
-export { createParticles, updateSimulation, simulationUpdateInterval };
+export { createParticles, updateSimulation, simulationUpdateInterval, Particles };
