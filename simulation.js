@@ -4,7 +4,7 @@ import { n, setParticleCount} from "./config.js";
 let Particles = [];
 
 // Variables for types
-let nTypes = 3;
+let nTypes = 1;
 let Types = [];
 
 // Simulation settings
@@ -65,7 +65,7 @@ function updateSimulation() {
 
       // Equillibiurm logic
       let m = 0.3 // multiplier
-      if (d < 100) { m *= -0.3 } //50 is a good value
+      // if (d < 100) { m *= -0.3 } //50 is a good value
 
       // Calculate force vectors
       let f = 1/(d+1e-8)*m;  // Add a small value to prevent division by zero
@@ -90,21 +90,20 @@ function updateSimulation() {
   };
 
   // Update particles
-  let t = simulationUpdateInterval * simulationSpeed
-  let tSquared = t**2
-  Particles.forEach((p, i) => {
-    // Update particle coordinates (using fomrula x(t)= 0.5*a*t^2 + v0*t + x0)
-    p.x += 0.5 * (forceVectors[i][0] * tSquared) + p.vx * t;
-    p.y += 0.5 * (forceVectors[i][1] * tSquared) + p.vy * t;
-
-    // Update velocities
-    p.vx += forceVectors[i][0] * t;
-    p.vy += forceVectors[i][1] * t;
-
-    // Introduce friction (1 means no friction, <1 means friction)
-    const friction = 0.20 // low value prevents oscillating in stable arrangments.
-    p.vx *= friction
-    p.vy *= friction
+  let dt = simulationUpdateInterval * simulationSpeed
+  let dtSquared = dt**2
+  Particles.forEach((p, id) => {
+    
+    let ax = forceVectors[id][0];
+    let ay = forceVectors[id][1];
+  
+    p.x += p.vx * dt + 0.5 * ax * dtSquared;
+    p.y += p.vy * dt + 0.5 * ay * dtSquared;
+  
+    // Update velocities based on acceleration (after position update)
+    const friction = 0.9 // low value prevents oscillating in stable arrangments. (1 means no friction, <1 means friction)
+    p.vx += ax * dt * friction;
+    p.vy += ay * dt * friction;
 
     // Constrain particles to within visible canvas
     if (p.x < 0 || p.x > canvas.width) {
